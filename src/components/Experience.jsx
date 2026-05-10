@@ -46,7 +46,7 @@ function CompanyLogo({ url, name }) {
       alt={`${name} logo`}
       onError={() => setErr(true)}
       style={{
-        width: '80px',
+        width: '160px',
         height: '80px',
         objectFit: 'contain',
         background: 'transparent',
