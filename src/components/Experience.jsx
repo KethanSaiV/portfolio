@@ -46,14 +46,12 @@ function CompanyLogo({ url, name }) {
       alt={`${name} logo`}
       onError={() => setErr(true)}
       style={{
-        width: '48px',
-        height: '48px',
+        width: '80px',
+        height: '80px',
         objectFit: 'contain',
-        borderRadius: '8px',
-        background: 'var(--surface2)',
-        border: '1px solid var(--border)',
-        padding: '4px',
+        background: 'transparent',
         flexShrink: 0,
+        mixBlendMode: 'screen',
       }}
     />
   );
@@ -131,13 +129,17 @@ export default function Experience() {
                       {exp.role}
                     </h3>
 
-                    {/* Company name + logo */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
-                      <p style={{ fontSize: '0.88rem', color: 'var(--red)', fontWeight: 500, margin: 0 }}>
-                        {exp.organization}
-                      </p>
-                      <CompanyLogo url={exp.logo_url} name={exp.organization} />
-                    </div>
+                    {/* Company name */}
+                    <p style={{ fontSize: '0.88rem', color: 'var(--red)', fontWeight: 500, marginBottom: '0.25rem' }}>
+                      {exp.organization}
+                    </p>
+
+                    {/* Logo top-right */}
+                    {exp.logo_url && (
+                      <div style={{ position: 'absolute', top: 0, right: '2rem' }}>
+                        <CompanyLogo url={exp.logo_url} name={exp.organization} />
+                      </div>
+                    )}
 
                     <p style={{ fontSize: '0.78rem', color: 'var(--muted)', marginBottom: '0.85rem' }}>
                       📍 {exp.location}
