@@ -88,58 +88,113 @@ function AboutPanel() {
 /* ─── THEME PANEL ─── */
 function ThemePanel() {
   const defaults = {
-    '--red': '#ff3c00',
-    '--black': '#080808',
-    '--surface': '#111111',
-    '--surface2': '#181818',
-    '--border': '#242424',
-    '--text': '#f0ede8',
-    '--muted': '#888880',
+    accent: '#ff3c00',
+    background: '#080808',
+    card: '#111111',
+    surface2: '#181818',
+    border: '#242424',
+    text: '#f0ede8',
+    muted: '#888880',
   };
 
   const PRESETS = [
-    { name: 'Default Dark', vars: { '--red': '#ff3c00', '--black': '#080808', '--surface': '#111111', '--surface2': '#181818', '--border': '#242424', '--text': '#f0ede8', '--muted': '#888880' } },
-    { name: 'Light Mode', vars: { '--red': '#ff3c00', '--black': '#f5f3ef', '--surface': '#ffffff', '--surface2': '#eeebe6', '--border': '#d8d4cc', '--text': '#0a0a0a', '--muted': '#666660' } },
-    { name: 'Midnight Blue', vars: { '--red': '#4f8ef7', '--black': '#060812', '--surface': '#0d1120', '--surface2': '#151a2e', '--border': '#1e2540', '--text': '#e8edf8', '--muted': '#7880a0' } },
-    { name: 'Forest', vars: { '--red': '#2ecc71', '--black': '#070d08', '--surface': '#0e1a10', '--surface2': '#162018', '--border': '#1e2e20', '--text': '#e8f0e8', '--muted': '#708070' } },
-    { name: 'Gold', vars: { '--red': '#f0a500', '--black': '#0a0800', '--surface': '#141000', '--surface2': '#1c1800', '--border': '#2a2400', '--text': '#f5f0e0', '--muted': '#908060' } },
-    { name: 'Rose', vars: { '--red': '#e91e8c', '--black': '#0a0608', '--surface': '#130a10', '--surface2': '#1c1018', '--border': '#2a1422', '--text': '#f8eef4', '--muted': '#907080' } },
+    { name: 'Default Dark', vars: { accent: '#ff3c00', background: '#080808', card: '#111111', surface2: '#181818', border: '#242424', text: '#f0ede8', muted: '#888880' } },
+    { name: 'Light Mode', vars: { accent: '#ff3c00', background: '#f5f3ef', card: '#ffffff', surface2: '#eeebe6', border: '#d8d4cc', text: '#0a0a0a', muted: '#666660' } },
+    { name: 'Midnight Blue', vars: { accent: '#4f8ef7', background: '#060812', card: '#0d1120', surface2: '#151a2e', border: '#1e2540', text: '#e8edf8', muted: '#7880a0' } },
+    { name: 'Forest', vars: { accent: '#2ecc71', background: '#070d08', card: '#0e1a10', surface2: '#162018', border: '#1e2e20', text: '#e8f0e8', muted: '#708070' } },
+    { name: 'Gold', vars: { accent: '#f0a500', background: '#0a0800', card: '#141000', surface2: '#1c1800', border: '#2a2400', text: '#f5f0e0', muted: '#908060' } },
+    { name: 'Rose', vars: { accent: '#e91e8c', background: '#0a0608', card: '#130a10', surface2: '#1c1018', border: '#2a1422', text: '#f8eef4', muted: '#907080' } },
   ];
 
-  const [colors, setColors] = useState(() => {
-    try {
-      const saved = localStorage.getItem('theme-colors');
-      return saved ? JSON.parse(saved) : defaults;
-    } catch { return defaults; }
-  });
+  const CSS_MAP = {
+    accent: '--red',
+    background: '--black',
+    card: '--surface',
+    surface2: '--surface2',
+    border: '--border',
+    text: '--text',
+    muted: '--muted',
+  };
+
+  const LABELS = {
+    accent: 'Accent Color',
+    background: 'Background',
+    card: 'Card Surface',
+    surface2: 'Surface 2',
+    border: 'Border Color',
+    text: 'Text Color',
+    muted: 'Muted Text',
+  };
+
+  const [colors, setColors] = useState(defaults);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  // Load from Supabase on mount
+  useEffect(() => {
+    supabase.from('theme').select('*').limit(1).single().then(({ data }) => {
+      if (data) {
+        const loaded = {
+          accent: data.accent || defaults.accent,
+          background: data.background || defaults.background,
+          card: data.card || defaults.card,
+          surface2: data.surface2 || defaults.surface2,
+          border: data.border || defaults.border,
+          text: data.text || defaults.text,
+          muted: data.muted || defaults.muted,
+        };
+        setColors(loaded);
+        applyToDOM(loaded);
+      }
+    });
+  }, []);
+
+  function applyToDOM(vars) {
+    const root = document.documentElement;
+    Object.entries(vars).forEach(([k, v]) => {
+      root.style.setProperty(CSS_MAP[k], v);
+    });
+  }
 
   function apply(vars) {
-    const root = document.documentElement;
-    Object.entries(vars).forEach(([k, v]) => root.style.setProperty(k, v));
     setColors(vars);
-    localStorage.setItem('theme-colors', JSON.stringify(vars));
+    applyToDOM(vars);
   }
 
   function handleChange(key, val) {
     apply({ ...colors, [key]: val });
   }
 
-  const LABELS = {
-    '--red': 'Accent Color',
-    '--black': 'Background',
-    '--surface': 'Card Surface',
-    '--surface2': 'Surface 2',
-    '--border': 'Border Color',
-    '--text': 'Text Color',
-    '--muted': 'Muted Text',
-  };
+  async function saveToSupabase() {
+    setSaving(true);
+    const { error } = await supabase.from('theme').update({
+      accent: colors.accent,
+      background: colors.background,
+      card: colors.card,
+      surface2: colors.surface2,
+      border: colors.border,
+      text: colors.text,
+      muted: colors.muted,
+      updated_at: new Date().toISOString(),
+    }).eq('id', 1);
+    setSaving(false);
+    setMsg(error ? `Error: ${error.message}` : 'Theme saved! All visitors will now see this theme.');
+    setTimeout(() => setMsg(''), 4000);
+  }
 
   return (
     <div>
       <div className="admin-panel-header">
         <h2 className="admin-panel-title">Theme Colors</h2>
-        <button className="btn btn-outline btn-sm" onClick={() => apply(defaults)}>Reset to Default</button>
+        <div style={{ display: 'flex', gap: '0.75rem' }}>
+          <button className="btn btn-outline btn-sm" onClick={() => apply(defaults)}>Reset to Default</button>
+          <button className="btn btn-primary btn-sm" onClick={saveToSupabase} disabled={saving}>
+            {saving ? 'Saving…' : 'Save for Everyone'}
+          </button>
+        </div>
       </div>
+
+      {msg && <p style={{ color: msg.startsWith('Error') ? '#ff6b6b' : '#4caf80', marginBottom: '1rem', fontSize: '0.85rem' }}>{msg}</p>}
 
       {/* Presets */}
       <div style={{ marginBottom: '2.5rem' }}>
@@ -152,13 +207,13 @@ function ThemePanel() {
                 fontFamily: 'var(--font-display)',
                 fontSize: '0.82rem',
                 letterSpacing: '0.1em',
-                background: p.vars['--surface'],
-                color: p.vars['--text'],
-                border: `2px solid ${p.vars['--red']}`,
+                background: p.vars.card,
+                color: p.vars.text,
+                border: `2px solid ${p.vars.accent}`,
                 cursor: 'pointer',
                 transition: 'transform 0.15s, box-shadow 0.15s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 4px 16px ${p.vars['--red']}44`; }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 4px 16px ${p.vars.accent}44`; }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
             >
               {p.name}
@@ -183,7 +238,7 @@ function ThemePanel() {
         ))}
       </div>
 
-      {/* Live preview strip */}
+      {/* Live preview */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', padding: '1.5rem', marginBottom: '1.5rem' }}>
         <p style={{ fontSize: '0.72rem', letterSpacing: '0.12em', color: 'var(--muted)', textTransform: 'uppercase', marginBottom: '1rem' }}>Live Preview</p>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
@@ -195,7 +250,7 @@ function ThemePanel() {
       </div>
 
       <p style={{ fontSize: '0.8rem', color: 'var(--muted)', lineHeight: 1.6 }}>
-        Changes apply instantly and are saved to your browser. To make them permanent for all visitors, copy the hex values into the <code style={{ fontFamily: 'monospace', color: 'var(--red)' }}>:root</code> block in <code style={{ fontFamily: 'monospace', color: 'var(--red)' }}>src/index.css</code>.
+        Pick your colors, preview them live, then click <strong style={{ color: 'var(--text)' }}>Save for Everyone</strong> — all visitors will see the new theme instantly.
       </p>
     </div>
   );
@@ -296,7 +351,6 @@ function CrudPanel({ table, label, columns, FormComponent, defaultItem }) {
 }
 
 /* ─── FORM COMPONENTS ─── */
-
 function F({ label, children }) {
   return <div className="field"><label>{label}</label>{children}</div>;
 }
@@ -367,8 +421,8 @@ function ExperienceForm({ item, onChange }) {
             {['Internship', 'Research', 'Full-time', 'Part-time', 'Education', 'Volunteer'].map(o => <option key={o}>{o}</option>)}
           </select>
         </F>
-        <F label="Start Date (YYYY-MM)"><input value={item.start_date || ''} onChange={set('start_date')} placeholder="2024-01" /></F>
-        <F label="End Date (YYYY-MM or blank)"><input value={item.end_date || ''} onChange={set('end_date')} placeholder="Leave blank for Present" /></F>
+        <F label="Start Date"><input value={item.start_date || ''} onChange={set('start_date')} placeholder="2024-01" /></F>
+        <F label="End Date (blank = Present)"><input value={item.end_date || ''} onChange={set('end_date')} /></F>
         <F label="Order Index"><input type="number" value={item.order_index ?? ''} onChange={set('order_index')} /></F>
       </div>
       <F label="Description"><textarea rows={3} value={item.description || ''} onChange={set('description')} /></F>
@@ -481,7 +535,6 @@ export default function Admin() {
     </div>
   );
 
-  /* Login screen */
   if (!session) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--black)' }}>
       <div style={{ width: '100%', maxWidth: '400px', padding: '2.5rem', background: 'var(--surface)', border: '1px solid var(--border)' }}>
@@ -511,7 +564,6 @@ export default function Admin() {
     </div>
   );
 
-  /* Authenticated — CMS layout */
   function renderPanel() {
     switch (active) {
       case 'about': return <AboutPanel />;
@@ -596,7 +648,6 @@ export default function Admin() {
 
   return (
     <div className="admin-layout" style={{ display: 'flex' }}>
-      {/* Sidebar */}
       <aside className="admin-sidebar">
         <div style={{ padding: '0 1.75rem 1.5rem', borderBottom: '1px solid var(--border)', marginBottom: '0.75rem' }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', letterSpacing: '0.2em', color: 'var(--red)', marginBottom: '0.25rem' }}>KSV</div>
@@ -631,7 +682,6 @@ export default function Admin() {
         </div>
       </aside>
 
-      {/* Main */}
       <main className="admin-main">
         {renderPanel()}
       </main>
