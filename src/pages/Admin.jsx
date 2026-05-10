@@ -130,7 +130,6 @@ function ThemePanel() {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
 
-  // Load from Supabase on mount
   useEffect(() => {
     supabase.from('theme').select('*').limit(1).single().then(({ data }) => {
       if (data) {
@@ -424,6 +423,7 @@ function ExperienceForm({ item, onChange }) {
         <F label="Start Date"><input value={item.start_date || ''} onChange={set('start_date')} placeholder="2024-01" /></F>
         <F label="End Date (blank = Present)"><input value={item.end_date || ''} onChange={set('end_date')} /></F>
         <F label="Order Index"><input type="number" value={item.order_index ?? ''} onChange={set('order_index')} /></F>
+        <F label="Logo URL"><input value={item.logo_url || ''} onChange={set('logo_url')} placeholder="https://logo.clearbit.com/company.com" /></F>
       </div>
       <F label="Description"><textarea rows={3} value={item.description || ''} onChange={set('description')} /></F>
       <F label="Highlights (one per line)">
@@ -594,13 +594,14 @@ export default function Admin() {
       );
       case 'experience': return (
         <CrudPanel table="experience" label="Experience"
-          defaultItem={{ role: '', organization: '', location: '', type: 'Internship', start_date: '', end_date: '', description: '', highlights: [], order_index: 0 }}
+          defaultItem={{ role: '', organization: '', location: '', type: 'Internship', start_date: '', end_date: '', description: '', highlights: [], order_index: 0, logo_url: '' }}
           columns={[
             { key: 'order_index', label: '#' },
             { key: 'role', label: 'Role' },
             { key: 'organization', label: 'Organization' },
             { key: 'type', label: 'Type' },
             { key: 'start_date', label: 'Start' },
+            { key: 'logo_url', label: 'Logo', render: v => v ? '🖼' : '—' },
           ]}
           FormComponent={ExperienceForm}
         />

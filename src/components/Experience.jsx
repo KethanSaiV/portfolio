@@ -4,64 +4,20 @@ import { supabase } from '../lib/supabase';
 const FALLBACK = [
   {
     id: 1,
-    role: 'Medical Image Processing Engineer (Intern)',
+    role: 'Medical Image Processing Engineer',
     organization: 'Perfint Healthcare Pvt Ltd',
     location: 'Chennai, India',
     start_date: '2024-01',
-    end_date: null,
+    end_date: '2026-01',
     type: 'Internship',
-    description: 'Working on CT-guided robotic biopsy systems, developing image processing algorithms for real-time needle tracking integrated with the MAXIO platform.',
+    logo_url: 'https://logo.clearbit.com/perfint.com',
+    description: 'Worked on CT-guided robotic biopsy systems, developing image processing algorithms for real-time needle tracking.',
     highlights: [
-      'Developed real-time needle segmentation pipeline for CT fluoroscopy',
-      'Integrated tracking algorithms with PERFINT MAXIO robotic guidance system',
-      'Collaborated on deep learning models for anatomy segmentation',
-      'Contributed to clinical validation workflows and testing protocols',
-    ],
-  },
-  {
-    id: 2,
-    role: 'AI & Medical Engineering Student',
-    organization: 'SRIHIER (Sri Ramachandra Institute of Higher Education and Research)',
-    location: 'Chennai, India',
-    start_date: '2022-08',
-    end_date: null,
-    type: 'Education',
-    description: 'Pursuing B.Tech in AI & Medical Engineering with Data Analytics specialization. Coursework spanning medical imaging, robotics, deep learning, and clinical informatics.',
-    highlights: [
-      'Specialization: Data Analytics & AI for Healthcare',
-      'Active member of Biomedical Engineering & Robotics clubs',
-      'Projects in medical image segmentation, surgical robotics, IGRT',
-      'Targeting M.Tech / Research in Germany (2026)',
-    ],
-  },
-  {
-    id: 3,
-    role: 'Research Intern',
-    organization: 'Computer Vision & Robotics Lab',
-    location: 'Chennai, India',
-    start_date: '2023-06',
-    end_date: '2023-12',
-    type: 'Research',
-    description: 'Conducted research in deep learning-based image segmentation for medical applications, focusing on tumour detection and automated clinical decision support tools.',
-    highlights: [
-      'Implemented and benchmarked U-Net, nnU-Net for liver/lung CT segmentation',
-      'Explored domain adaptation techniques for multi-centre imaging data',
-      'Presented findings at departmental research symposium',
-    ],
-  },
-  {
-    id: 4,
-    role: 'Data Analytics Intern',
-    organization: 'Healthcare Analytics Project',
-    location: 'Remote',
-    start_date: '2023-01',
-    end_date: '2023-05',
-    type: 'Internship',
-    description: 'Built data pipelines and analytical dashboards for clinical outcome prediction using structured EMR data. Applied statistical and ML models for patient risk stratification.',
-    highlights: [
-      'Developed ML models for patient readmission risk prediction',
-      'Built interactive dashboards using Python + Plotly for clinical insights',
-      'Cleaned and processed 50k+ patient records for cohort analysis',
+      'Built real-time spine MRI AI model with region-wise report integration',
+      'Developed structured spine dataset: 515 patients, ~48K slices',
+      'Implemented U-Net spine segmentation model',
+      'CT–MRI multimodal registration pipeline development',
+      'Collision-aware needle path planning system',
     ],
   },
 ];
@@ -71,12 +27,36 @@ const TYPE_COLOR = {
   'Education': '#4caf80',
   'Research': '#e0a020',
   'Full-time': '#60a0ff',
+  'Part-time': '#a060ff',
+  'Volunteer': '#20c0c0',
 };
 
 function fmt(dateStr) {
   if (!dateStr) return 'Present';
   const d = new Date(dateStr);
   return d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short' });
+}
+
+function CompanyLogo({ url, name }) {
+  const [err, setErr] = useState(false);
+  if (!url || err) return null;
+  return (
+    <img
+      src={url}
+      alt={`${name} logo`}
+      onError={() => setErr(true)}
+      style={{
+        width: '48px',
+        height: '48px',
+        objectFit: 'contain',
+        borderRadius: '8px',
+        background: 'var(--surface2)',
+        border: '1px solid var(--border)',
+        padding: '4px',
+        flexShrink: 0,
+      }}
+    />
+  );
 }
 
 export default function Experience() {
@@ -96,9 +76,7 @@ export default function Experience() {
     <section id="experience">
       <div className="container">
         <p className="section-label">Experience</p>
-        <h2 className="section-heading">
-          Timeline
-        </h2>
+        <h2 className="section-heading">Timeline</h2>
 
         {loading ? (
           <p style={{ color: 'var(--muted)' }}>Loading…</p>
@@ -113,7 +91,12 @@ export default function Experience() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
               {exps.map((exp, i) => (
-                <div key={exp.id} className="fade-up" style={{ animationDelay: `${i * 0.1}s`, display: 'flex', gap: '2.5rem', paddingLeft: '4rem', paddingBottom: '3rem', position: 'relative' }}>
+                <div key={exp.id} className="fade-up" style={{
+                  animationDelay: `${i * 0.1}s`,
+                  display: 'flex', gap: '2.5rem',
+                  paddingLeft: '4rem', paddingBottom: '3rem',
+                  position: 'relative',
+                }}>
                   {/* Dot */}
                   <div style={{
                     position: 'absolute', left: 'calc(1.5rem - 5px)', top: '6px',
@@ -147,9 +130,15 @@ export default function Experience() {
                     <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', letterSpacing: '0.04em', marginBottom: '0.2rem' }}>
                       {exp.role}
                     </h3>
-                    <p style={{ fontSize: '0.88rem', color: 'var(--red)', marginBottom: '0.25rem', fontWeight: 500 }}>
-                      {exp.organization}
-                    </p>
+
+                    {/* Company name + logo */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
+                      <p style={{ fontSize: '0.88rem', color: 'var(--red)', fontWeight: 500, margin: 0 }}>
+                        {exp.organization}
+                      </p>
+                      <CompanyLogo url={exp.logo_url} name={exp.organization} />
+                    </div>
+
                     <p style={{ fontSize: '0.78rem', color: 'var(--muted)', marginBottom: '0.85rem' }}>
                       📍 {exp.location}
                     </p>
