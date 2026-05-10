@@ -10,7 +10,7 @@ const FALLBACK = [
     start_date: '2024-01',
     end_date: '2026-01',
     type: 'Internship',
-    logo_url: 'https://logo.clearbit.com/perfint.com',
+    logo_url: 'https://www.google.com/s2/favicons?domain=perfint.com&sz=128',
     description: 'Worked on CT-guided robotic biopsy systems, developing image processing algorithms for real-time needle tracking.',
     highlights: [
       'Built real-time spine MRI AI model with region-wise report integration',

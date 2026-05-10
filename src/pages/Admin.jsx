@@ -423,7 +423,7 @@ function ExperienceForm({ item, onChange }) {
         <F label="Start Date"><input value={item.start_date || ''} onChange={set('start_date')} placeholder="2024-01" /></F>
         <F label="End Date (blank = Present)"><input value={item.end_date || ''} onChange={set('end_date')} /></F>
         <F label="Order Index"><input type="number" value={item.order_index ?? ''} onChange={set('order_index')} /></F>
-        <F label="Logo URL"><input value={item.logo_url || ''} onChange={set('logo_url')} placeholder="https://logo.clearbit.com/company.com" /></F>
+        <F label="Logo URL"><input value={item.logo_url || ''} onChange={set('logo_url')} placeholder="https://www.google.com/s2/favicons?domain=company.com&sz=128" /></F>
       </div>
       <F label="Description"><textarea rows={3} value={item.description || ''} onChange={set('description')} /></F>
       <F label="Highlights (one per line)">
