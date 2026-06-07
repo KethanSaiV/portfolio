@@ -76,7 +76,65 @@ function AboutPanel() {
             </div>
           ))}
         </div>
-        <div className="field">
+
+        {/* ── Hero Settings ── */}
+        <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'var(--surface2)', border: '1px solid var(--border)' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.75rem', letterSpacing: '0.2em', color: 'var(--red)', marginBottom: '1.25rem' }}>
+            HERO SETTINGS
+          </div>
+
+          {/* Video URL */}
+          <div className="field" style={{ marginBottom: '1.25rem' }}>
+            <label>Background Video URL <span style={{ color: 'var(--muted)', fontWeight: 300 }}>(leave empty to hide)</span></label>
+            <input
+              value={data.video_url || ''}
+              onChange={e => set('video_url', e.target.value)}
+              placeholder="https://..."
+            />
+          </div>
+
+          {/* Video Brightness */}
+          <div className="field" style={{ marginBottom: '1.25rem' }}>
+            <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span>Video Brightness</span>
+              <span style={{ color: 'var(--red)', fontFamily: 'var(--font-display)' }}>
+                {Math.round((data.video_opacity ?? 0.08) * 100)}%
+              </span>
+            </label>
+            <input
+              type="range"
+              min={0} max={0.5} step={0.01}
+              value={data.video_opacity ?? 0.08}
+              onChange={e => set('video_opacity', parseFloat(e.target.value))}
+              style={{ width: '100%', accentColor: 'var(--red)' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
+              <span>Invisible</span><span>50%</span>
+            </div>
+          </div>
+
+          {/* DP Size */}
+          <div className="field">
+            <label style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span>Profile Photo Size</span>
+              <span style={{ color: 'var(--red)', fontFamily: 'var(--font-display)' }}>
+                {data.photo_size ?? 220}px
+              </span>
+            </label>
+            <input
+              type="range"
+              min={100} max={400} step={10}
+              value={data.photo_size ?? 220}
+              onChange={e => set('photo_size', parseInt(e.target.value))}
+              style={{ width: '100%', accentColor: 'var(--red)' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--muted)', marginTop: '0.25rem' }}>
+              <span>100px</span><span>400px</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="field" style={{ marginTop: '1.25rem' }}>
           <label>Bio</label>
           <textarea rows={5} value={data.bio || ''} onChange={e => set('bio', e.target.value)} />
         </div>
